@@ -109,6 +109,10 @@ impl TextServiceFactory {
                         ClientAction::AppendText(number.to_string()),
                     ],
                 ),
+                UserAction::Space if mode == InputMode::Kana => (
+                    CompositionState::None,
+                    vec![ClientAction::CommitText("\u{3000}".to_string())],
+                ),
                 UserAction::ToggleInputMode => (
                     CompositionState::None,
                     vec![match mode {
@@ -409,6 +413,18 @@ impl TextServiceFactory {
                     self.set_text(&text, &sub_text)?;
                     ipc_service.set_candidates(candidates.texts.clone())?;
                     ipc_service.set_selection(selection_index as i32)?;
+                }
+                ClientAction::CommitText(text) => {
+                    self.start_composition()?;
+                    self.set_text(text, "")?;
+                    self.end_composition()?;
+
+                    selection_index = 0;
+                    corresponding_count = 0;
+                    preview.clear();
+                    suffix.clear();
+                    raw_input.clear();
+                    raw_hiragana.clear();
                 }
                 ClientAction::RemoveText => {
                     candidates = ipc_service.remove_text()?;
