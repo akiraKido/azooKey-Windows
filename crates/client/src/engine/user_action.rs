@@ -1,5 +1,6 @@
-use crate::extension::VKeyExt;
+use crate::{engine::input_mode::InputMode, extension::VKeyExt};
 use anyhow::{Context, Result};
+use shared::AppConfig;
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetKeyboardState, ToUnicode, VK_SHIFT};
 
 #[derive(Debug)]
@@ -15,6 +16,7 @@ pub enum UserAction {
     Function(Function),
     Number(i8),
     ToggleInputMode,
+    SetInputMode(InputMode),
 }
 
 #[derive(Debug)]
@@ -37,6 +39,7 @@ pub enum Function {
 impl TryFrom<usize> for UserAction {
     type Error = anyhow::Error;
     fn try_from(key_code: usize) -> Result<UserAction> {
+        let shortcuts = AppConfig::read().shortcuts;
         let action = match key_code {
             0x08 => UserAction::Backspace, // VK_BACK
             0x09 => UserAction::Tab,       // VK_TAB
@@ -71,6 +74,8 @@ impl TryFrom<usize> for UserAction {
             0x78 => UserAction::Function(Function::Nine), // VK_F9
             0x79 => UserAction::Function(Function::Ten), // VK_F10
 
+            0x1C if shortcuts.mac_like_ime_keys => UserAction::SetInputMode(InputMode::Kana), // VK_CONVERT
+            0x1D if shortcuts.mac_like_ime_keys => UserAction::SetInputMode(InputMode::Latin), // VK_NONCONVERT
             0xF3 | 0xF4 => UserAction::ToggleInputMode, // Zenkaku/Hankaku
 
             _ => {

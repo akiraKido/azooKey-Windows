@@ -23,20 +23,44 @@ pub struct ZenzaiConfig {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ShortcutConfig {
+    #[serde(default)]
+    pub mac_like_ime_keys: bool,
+}
+
+impl Default for ShortcutConfig {
+    fn default() -> Self {
+        ShortcutConfig {
+            mac_like_ime_keys: false,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AppConfig {
     pub version: String,
+    #[serde(default)]
     pub zenzai: ZenzaiConfig,
+    #[serde(default)]
+    pub shortcuts: ShortcutConfig,
+}
+
+impl Default for ZenzaiConfig {
+    fn default() -> Self {
+        ZenzaiConfig {
+            enable: false,
+            profile: "".to_string(),
+            backend: "cpu".to_string(),
+        }
+    }
 }
 
 impl Default for AppConfig {
     fn default() -> Self {
         AppConfig {
             version: "0.1.0".to_string(),
-            zenzai: ZenzaiConfig {
-                enable: false,
-                profile: "".to_string(),
-                backend: "cpu".to_string(),
-            },
+            zenzai: ZenzaiConfig::default(),
+            shortcuts: ShortcutConfig::default(),
         }
     }
 }
@@ -53,8 +77,10 @@ impl AppConfig {
         if !config_path.exists() {
             return AppConfig::default();
         }
-        let config_str = std::fs::read_to_string(config_path).unwrap();
-        serde_json::from_str(&config_str).unwrap()
+        let Ok(config_str) = std::fs::read_to_string(config_path) else {
+            return AppConfig::default();
+        };
+        serde_json::from_str(&config_str).unwrap_or_default()
     }
 
     pub fn new() -> Self {

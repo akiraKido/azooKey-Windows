@@ -116,6 +116,10 @@ impl TextServiceFactory {
                         InputMode::Latin => ClientAction::SetIMEMode(InputMode::Kana),
                     }],
                 ),
+                UserAction::SetInputMode(input_mode) => (
+                    CompositionState::None,
+                    vec![ClientAction::SetIMEMode(input_mode)],
+                ),
                 _ => {
                     return Ok(None);
                 }
@@ -176,6 +180,13 @@ impl TextServiceFactory {
                     vec![
                         ClientAction::EndComposition,
                         ClientAction::SetIMEMode(InputMode::Latin),
+                    ],
+                ),
+                UserAction::SetInputMode(input_mode) => (
+                    CompositionState::None,
+                    vec![
+                        ClientAction::EndComposition,
+                        ClientAction::SetIMEMode(input_mode),
                     ],
                 ),
                 UserAction::Space | UserAction::Tab => (
@@ -264,6 +275,13 @@ impl TextServiceFactory {
                     vec![
                         ClientAction::EndComposition,
                         ClientAction::SetIMEMode(InputMode::Latin),
+                    ],
+                ),
+                UserAction::SetInputMode(input_mode) => (
+                    CompositionState::None,
+                    vec![
+                        ClientAction::EndComposition,
+                        ClientAction::SetIMEMode(input_mode),
                     ],
                 ),
                 UserAction::Space | UserAction::Tab => (

@@ -4,5 +4,8 @@
         "enable": false,
         "profile": "",
         "backend": "cpu"
+    },
+    "shortcuts": {
+        "mac_like_ime_keys": false
     }
 }
